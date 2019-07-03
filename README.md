@@ -1,10 +1,17 @@
 # learnCUDA
 This repository contains notes about CUDA programming.
 
+# Background
 ## Terminology
-### Heterogeneous Computing
+- Heterogeneous Computing
   - Host The CPU and its memory (host memory)
   - Device The GPU and its memory (device memory)
+### Programming in Parallel
+GPU computing is about massive parallelism. We will use 'blocks' and 'threads' to implement parallelism.
+### CUDA Threads
+A block can be split into parallel threads
+
+
 ## Memory Management
 Host and device memory are separate entities:
   - Device pointers point to GPU memory
@@ -18,7 +25,8 @@ Host and device memory are separate entities:
 We can use `cudaMalloc()`,`cudaFree()`,`cudaMemcpy()`. 
 These ara similar to the C equivalents `malloc()`, `free()`, `memcpy()`.
 
-## Programming 
+
+# Examples
 ### "Hello CUDA World"
 ```cpp
 int main(void) {
@@ -50,7 +58,7 @@ int main(void) {
       - gcc, cl.exe
       
 ```cpp 
-mykernel<<<1,1>>>();
+my_cuda_kernel<<<1,1>>>();
 ```
 Triple angle brackets mark a call from host code to device code.
   - Also called a “kernel launch”
@@ -62,11 +70,11 @@ That’s all that is required to execute a function on the GPU!
 __global__ is a CUDA C/C++ keyword meaning 
   1. add() will execute on the device
   2. add() will be called from the host
-/*
+*/
 __global__ void add(int *a, int *b, int *c) {
   *c = *a + *b;
   
-  int main(void) {
+int main(void) {
       // host copies of a, b, c
       int a, b, c; 
       // device copies of a, b, c
@@ -91,5 +99,85 @@ __global__ void add(int *a, int *b, int *c) {
       return 0;
   }
 ```
-In this example we use pointers for the variables. `add()` runs on the device, so *a*, *b* and *c* must point to device memory. We need to allocate memory on the GPU. 
+In this example we use pointers for the variables. `add()` runs on the device, so *a*, *b* and *c* must point to device memory. We need to allocate memory on the GPU using `cudaMemcpy()` method. 
+### Vector Addition on Device (Parallel)
+With `add()` (mentioned in previous example) running in parallel we can do vector addition.
+  - Each parallel invocation of `add()` is referred to as a *block*.
+  - The *set of blocks* is referred to as a *grid*
+  - Each invocation can refer to its *block index* using `blockIdx.x`
+    ```cpp
+    __global__ void add(int *a, int *b, int *c) {
+      c[blockIdx.x] = a[blockIdx.x] + b[blockIdx.x];
+      }
+    ```
+  - By using `blockIdx.x` to index into the array, each block handles *a different element* of the array.
+```cpp 
+// This kernel handles a differen element of the array.
+__global__ void add(int *a, int *b, int *c) {
+    c[blockIdx.x] = a[blockIdx.x] + b[blockIdx.x];
+}
 
+#define N 512
+int main(void) {
+    int *a, *b, *c; // host copies of a, b, c
+    int *d_a, *d_b, *d_c; // device copies of a, b, c
+    int size = N * sizeof(int);
+    // Alloc space for device copies of a, b, c
+    cudaMalloc((void **)&d_a, size);
+    cudaMalloc((void **)&d_b, size);
+    cudaMalloc((void **)&d_c, size);
+    // Alloc space for host copies of a, b, c and setup input values
+    a = (int *)malloc(size); random_ints(a, N);
+    b = (int *)malloc(size); random_ints(b, N);
+    c = (int *)malloc(size);
+    // Copy inputs to device
+    cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
+    // Launch add() kernel on GPU with N blocks
+    add<<<N,1>>>(d_a, d_b, d_c);
+    // Copy result back to host
+    cudaMemcpy(c, d_c, size, cudaMemcpyDeviceToHost);
+    // Cleanup
+    free(a); free(b); free(c);
+    cudaFree(d_a); cudaFree(d_b); cudaFree(d_c);
+    return 0;
+}
+
+```
+### Vector Addition Using Threads
+We use `threadIdx.x` instead of `blockIdx.x`.
+Let’s change add() to use parallel threads instead of parallel blocks:
+  ```cpp 
+    __global__ void add(int *a, int *b, int *c) {
+        c[blockIdx.x] = a[blockIdx.x] + b[blockIdx.x];
+    }  
+  ```
+  
+```cpp 
+#define N 512
+int main(void) {
+    int *a, *b, *c; // host copies of a, b, c
+    int *d_a, *d_b, *d_c; // device copies of a, b, c
+    int size = N * sizeof(int);
+    // Alloc space for device copies of a, b, c
+    cudaMalloc((void **)&d_a, size);
+    cudaMalloc((void **)&d_b, size);
+    cudaMalloc((void **)&d_c, size);
+    // Alloc space for host copies of a, b, c and setup input values
+    a = (int *)malloc(size); random_ints(a, N);
+    b = (int *)malloc(size); random_ints(b, N);
+    c = (int *)malloc(size);
+    // Copy inputs to device
+    cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
+    // Launch add() kernel on GPU with N blocks
+    add<<<N,1>>>(d_a, d_b, d_c);
+    // Copy result back to host
+    cudaMemcpy(c, d_c, size, cudaMemcpyDeviceToHost);
+    // Cleanup
+    free(a); free(b); free(c);
+    cudaFree(d_a); cudaFree(d_b); cudaFree(d_c);
+    return 0;
+}
+
+```
