@@ -8,16 +8,20 @@ In GPU-accelerated applications, the sequential part of the workload runs on the
 CUDA accelerates applications across a wide range of domains from image processing, to deep learning, numerical analytics and computational science. (ref:https://developer.nvidia.com/cuda-zone) 
 
 ## What we will learn?
-- Write and launch CUDA C/C++ kernels
-  - `__global__`, `<<<>>>`, `blockIdx`, `threadIdx`, `blockDim`
-- Manage GPU memory
-  - `cudaMalloc()`, `cudaMemcpy()`, `cudaFree()`
-- Manage communication and synchronization
-  - `__shared__`, `__syncthreads()`
-  - `cudaMemcpy()` vs `cudaMemcpyAsync()`, `cudaDeviceSynchronize()`
-
+- [x] Write and launch CUDA C/C++ kernels
+  - [x] `__global__`, `<<<>>>`, `blockIdx`, `threadIdx`, `blockDim`
+- [x] Manage GPU memory
+  - [x] `cudaMalloc()`, `cudaMemcpy()`, `cudaFree()`
+- [x] Manage communication and synchronization
+  - [x] `__shared__`, `__syncthreads()`
+  - [x] `cudaMemcpy()` vs `cudaMemcpyAsync()`, `cudaDeviceSynchronize()`
+- [ ] CUDA Optimization Techniques
+- [ ] CUDA Persistent Threads
 ## Useful Links
 - CUDA Zone – tools, training and webinars : https://developer.nvidia.com/cuda-zone
+- Udacity - Intro to Parallel Programming. : https://www.youtube.com/watch?v=GiGE3QjwknQ&list=PLGvfHSgImk4aweyWlhBXNF6XISY3um82_&index=36
+- Tools
+    - Nsight - Setting Host and client devices : https://www.youtube.com/watch?v=2Mi3MRKtg2M
 
 # Background
 ## Terminology
@@ -112,6 +116,9 @@ Host and device memory are separate entities:
 We can use `cudaMalloc()`,`cudaFree()`,`cudaMemcpy()`. 
 These ara similar to the C equivalents `malloc()`, `free()`, `memcpy()`.
 
+### Notes about GPU Limitations
+An ideal real-time system would be able to terminate periodic tasks that do not complete by their deadline, as the result of their computation is no longer temporally valid. Current GPUs, including the one in the Jetson, do not provide a mechanism for stopping GPU operations after they are launched without resetting the entire device; GPUs cannot be considered preemptable resources as required by many conventional real-time scheduling algorithms. This creates the undesirable property that if we cannot bound the runtime of a
+GPU program, we have no guarantees on when it will terminate.
 
 # Examples
 ### "Hello CUDA World"
