@@ -1,4 +1,4 @@
-# learnCUDA
+# Learn CUDA
 This repository contains notes about CUDA programming.
 
 # Background
@@ -7,10 +7,42 @@ This repository contains notes about CUDA programming.
   - Host The CPU and its memory (host memory)
   - Device The GPU and its memory (device memory)
 ### Programming in Parallel
-GPU computing is about massive parallelism. We will use 'blocks' and 'threads' to implement parallelism.
-### CUDA Threads
-A block can be split into parallel threads
+GPU computing is about massive parallelism. We will use __'blocks'__ and __'threads'__ to implement parallelism.
+### Blocks
+...
+### Threads
+A block can be split into parallel threads. Unlike parallel blocks, threads have mechanisms to efficiently:
+- Communicate
+- Synchronize
 
+Launching parallel threads:
+- Launch __N__ blocks with __M__ threads per block with `kernel<<<N,M>>>(…);`
+- Use `blockIdx.x` to access block index within grid
+- Use `threadIdx.x` to access thread index within block
+
+Allocate elements to threads:
+- ```cpp
+  int index = threadIdx.x + blockIdx.x * blockDim.x;
+  ```
+
+Use `__shared__` to declare a variable/array in shared memory
+- Data is shared between threads in a block
+- Not visible to threads in other blocks
+Use `__syncthreads()` as a barrier
+- Use to prevent data hazards
+
+### Sharing Data Between Threads
+- Within a block, threads share data via __shared memory__.
+- Extremely fast on-chip memory,
+  - By opposition to device memory, referred to as __global memory__
+  - Like a user-managed cache
+- Declare using __`__shared__`__, allocated per block.
+- Data is not visible to threads in other blocks.
+- __Implementing With Shared Memory__
+  - Cache data in shared memory
+    - Read (blockDim.x + 2 * radius) input elements from global memory to shared memory
+    - Compute blockDim.x output elements
+    - Write blockDim.x output elements to global memory
 
 ## Memory Management
 Host and device memory are separate entities:
@@ -231,4 +263,54 @@ if (index < n)
 And update the kernel launch:
 ```cpp 
 add<<<(N + M-1) / M,M>>>(d_a, d_b, d_c, N);
+```
+### Cooperating Threads
+1. 1D Stencil
+```cpp
+// IMPORTANT NOTE : This example causes race condition. Please do not use and refer to __syncthreads().
+__global__ void stencil_1d(int *in, int *out) {
+     __shared__ int temp[BLOCK_SIZE + 2 * RADIUS];
+     int gindex = threadIdx.x + blockIdx.x * blockDim.x;
+     int lindex = threadIdx.x + RADIUS;
+     // Read input elements into shared memory
+     temp[lindex] = in[gindex];
+     if (threadIdx.x < RADIUS) {
+     temp[lindex - RADIUS] = in[gindex - RADIUS];
+     temp[lindex + BLOCK_SIZE] = in[gindex + BLOCK_SIZE];
+ }
+ // Apply the stencil
+ int result = 0;
+ for (int offset = -RADIUS ; offset <= RADIUS ; offset++)
+ result += temp[lindex + offset];
+ // Store the result
+ out[gindex] = result;
+}
+```
+2. `__syncthreads()`
+```cpp void __syncthreads();```
+- Synchronizes all threads within a block
+  - Used to prevent RAW / WAR / WAW hazards
+- All threads must reach the barrier
+  - In conditional code, the condition must be uniform across the block
+So we can implement stencil with sycning threads:
+```cpp
+__global__ void stencil_1d(int *in, int *out) {
+      __shared__ int temp[BLOCK_SIZE + 2 * RADIUS];
+      int gindex = threadIdx.x + blockIdx.x * blockDim.x;
+      int lindex = threadIdx.x + radius;
+      // Read input elements into shared memory
+      temp[lindex] = in[gindex];
+      if (threadIdx.x < RADIUS) {
+      temp[lindex – RADIUS] = in[gindex – RADIUS];
+      temp[lindex + BLOCK_SIZE] = in[gindex + BLOCK_SIZE];
+      }
+      // Synchronize (ensure all the data is available)
+      __syncthreads();
+      // Apply the stencil
+      int result = 0;
+      for (int offset = -RADIUS ; offset <= RADIUS ; offset++)
+      result += temp[lindex + offset];
+      // Store the result
+      out[gindex] = result;
+}
 ```
