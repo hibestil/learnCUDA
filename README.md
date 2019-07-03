@@ -52,9 +52,9 @@ Use `__syncthreads()` as a barrier
 - Data is not visible to threads in other blocks.
 - __Implementing With Shared Memory__
   - Cache data in shared memory
-    - Read `(blockDim.x + 2 * radius)` input elements from global memory to shared memory
-    - Compute blockDim.x output elements
-    - Write blockDim.x output elements to global memory
+  - Read `(blockDim.x + 2 * radius)` input elements from global memory to shared memory
+  - Compute `blockDim.x` output elements
+  - Write `blockDim.x` output elements to global memory
 ## Managing the Device
 __1. Coordinating Host & Device__
 - Kernel launches are asynchronous
