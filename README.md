@@ -219,3 +219,16 @@ int main(void) {
     return 0;
 }
 ```
+### Handling Arbitrary Vector Sizes
+Avoid accessing beyond the end of the arrays:
+```cpp 
+__global__ void add(int *a, int *b, int *c, int n) {
+int index = threadIdx.x + blockIdx.x * blockDim.x;
+if (index < n)
+ c[index] = a[index] + b[index];
+}
+```
+And update the kernel launch:
+```cpp 
+add<<<(N + M-1) / M,M>>>(d_a, d_b, d_c, N);
+```
