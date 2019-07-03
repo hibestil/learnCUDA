@@ -1,5 +1,12 @@
 # Learn CUDA
-This repository contains notes about CUDA programming.
+__This repository contains notes and examples about CUDA programming__ to get started with CUDA.
+## Introduction
+CUDA® is a parallel computing platform and programming model developed by NVIDIA for general computing on graphical processing units (GPUs). With CUDA, developers are able to dramatically speed up computing applications by harnessing the power of GPUs.
+
+In GPU-accelerated applications, the sequential part of the workload runs on the CPU – which is optimized for single-threaded performance – while the compute intensive portion of the application runs on thousands of GPU cores in parallel. When using CUDA, developers program in popular languages such as C, C++, Fortran, Python and MATLAB and express parallelism through extensions in the form of a few basic keywords.
+
+CUDA accelerates applications across a wide range of domains from image processing, to deep learning, numerical analytics and computational science. (ref:https://developer.nvidia.com/cuda-zone) 
+
 ## What we will learn?
 - Write and launch CUDA C/C++ kernels
   - `__global__`, `<<<>>>`, `blockIdx`, `threadIdx`, `blockDim`
@@ -8,16 +15,19 @@ This repository contains notes about CUDA programming.
 - Manage communication and synchronization
   - `__shared__`, `__syncthreads()`
   - `cudaMemcpy()` vs `cudaMemcpyAsync()`, `cudaDeviceSynchronize()`
+
 ## Useful Links
 - CUDA Zone – tools, training and webinars : https://developer.nvidia.com/cuda-zone
-
-
 
 # Background
 ## Terminology
 - Heterogeneous Computing
   - Host The CPU and its memory (host memory)
   - Device The GPU and its memory (device memory)
+- The __compute capability__ of a device describes its architecture, e.g.
+  - Number of registers
+  - Sizes of memories
+  - Features & capabilities
 ### Programming in Parallel
 GPU computing is about massive parallelism. We will use __'blocks'__ and __'threads'__ to implement parallelism.
 ### Blocks
