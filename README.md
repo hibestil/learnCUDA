@@ -1,5 +1,17 @@
 # Learn CUDA
 This repository contains notes about CUDA programming.
+## What we will learn?
+- Write and launch CUDA C/C++ kernels
+  - `__global__`, `<<<>>>`, `blockIdx`, `threadIdx`, `blockDim`
+- Manage GPU memory
+  - `cudaMalloc()`, `cudaMemcpy()`, `cudaFree()`
+- Manage communication and synchronization
+  - `__shared__`, `__syncthreads()`
+  - `cudaMemcpy()` vs `cudaMemcpyAsync()`, `cudaDeviceSynchronize()`
+## Useful Links
+- CUDA Zone – tools, training and webinars : https://developer.nvidia.com/cuda-zone
+
+
 
 # Background
 ## Terminology
@@ -40,10 +52,43 @@ Use `__syncthreads()` as a barrier
 - Data is not visible to threads in other blocks.
 - __Implementing With Shared Memory__
   - Cache data in shared memory
-    - Read (blockDim.x + 2 * radius) input elements from global memory to shared memory
+    - Read `(blockDim.x + 2 * radius)` input elements from global memory to shared memory
     - Compute blockDim.x output elements
     - Write blockDim.x output elements to global memory
-
+## Managing the Device
+__1. Coordinating Host & Device__
+- Kernel launches are asynchronous
+  - Control returns to the CPU immediately
+- CPU needs to synchronize before consuming the results
+  - `cudaMemcpy()`            : Blocks the CPU until the copy is complete
+Copy begins when all preceding CUDA calls have completed
+  - `cudaMemcpyAsync()`       : Asynchronous, does not block the CPU
+  - `cudaDeviceSynchronize()` : Blocks the CPU until all preceding CUDA calls have completed
+__2. Reporting Errors__
+- All CUDA API calls return an error code (`cudaError_t`)
+  - Error in the API call itself
+  - Or error in an earlier asynchronous operation (e.g. kernel)
+- Get the error code for the last error:
+  - ```cpp
+      cudaError_t cudaGetLastError(void)
+    ```
+- Get a string to describe the error:
+- ```cpp
+    char *cudaGetErrorString(cudaError_t)
+    printf("%s\n", cudaGetErrorString(cudaGetLastError()));
+  ```
+__3. Device Management__
+- Application can query and select GPUs
+  - ```cpp
+    cudaGetDeviceCount(int *count)
+    cudaSetDevice(int device)
+    cudaGetDevice(int *device)
+    cudaGetDeviceProperties(cudaDeviceProp *prop, int device)
+    ```
+ - Multiple host threads can share a device
+ - A single host thread can manage multiple devices
+    - `cudaSetDevice(i)` to select current device
+    - `cudaMemcpy(…)` for peer-to-peer copies
 ## Memory Management
 Host and device memory are separate entities:
   - Device pointers point to GPU memory
@@ -287,7 +332,9 @@ __global__ void stencil_1d(int *in, int *out) {
 }
 ```
 2. `__syncthreads()`
-```cpp void __syncthreads();```
+```
+cpp void __syncthreads();
+```
 - Synchronizes all threads within a block
   - Used to prevent RAW / WAR / WAW hazards
 - All threads must reach the barrier
