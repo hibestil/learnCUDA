@@ -6,6 +6,10 @@ CUDA® is a parallel computing platform and programming model developed by NVIDI
 In GPU-accelerated applications, the sequential part of the workload runs on the CPU – which is optimized for single-threaded performance – while the compute intensive portion of the application runs on thousands of GPU cores in parallel. When using CUDA, developers program in popular languages such as C, C++, Fortran, Python and MATLAB and express parallelism through extensions in the form of a few basic keywords.
 
 CUDA accelerates applications across a wide range of domains from image processing, to deep learning, numerical analytics and computational science. (ref:https://developer.nvidia.com/cuda-zone) 
+## Table of Contents
+[Headers](#headers)  
+[Emphasis](#emphasis) 
+
 
 ## What we will learn?
 - [x] Write and launch CUDA C/C++ kernels
@@ -26,49 +30,48 @@ CUDA accelerates applications across a wide range of domains from image processi
 # Background
 ## Terminology
 - Heterogeneous Computing
-  - Host The CPU and its memory (host memory)
-  - Device The GPU and its memory (device memory)
+  > - Host The CPU and its memory (host memory)
+  > - Device The GPU and its memory (device memory)
 - The __compute capability__ of a device describes its architecture, e.g.
-  - Number of registers
-  - Sizes of memories
-  - Features & capabilities
-### Programming in Parallel
-GPU computing is about massive parallelism. We will use __'blocks'__ and __'threads'__ to implement parallelism.
-### Blocks
-...
-### Threads
-A block can be split into parallel threads. Unlike parallel blocks, threads have mechanisms to efficiently:
-- Communicate
-- Synchronize
+  > - Number of registers
+  > - Sizes of memories
+  > - Features & capabilities
+- Programming in Parallel
+  > - GPU computing is about massive parallelism. We will use __'blocks'__ and __'threads'__ to implement parallelism.
+- Blocks
+  > - ...
+- Threads
+  > - A block can be split into parallel threads. Unlike parallel blocks, threads have mechanisms to efficiently:
+  >  - Communicate
+  >  - Synchronize
 
-Launching parallel threads:
-- Launch __N__ blocks with __M__ threads per block with `kernel<<<N,M>>>(…);`
-- Use `blockIdx.x` to access block index within grid
-- Use `threadIdx.x` to access thread index within block
+- Launching parallel threads:
+  > - Launch __N__ blocks with __M__ threads per block with `kernel<<<N,M>>>(…);`
+  > - Use `blockIdx.x` to access block index within grid
+  > - Use `threadIdx.x` to access thread index within block
 
-Allocate elements to threads:
-- ```cpp
-  int index = threadIdx.x + blockIdx.x * blockDim.x;
-  ```
+- Allocate elements to threads:
+  - ```cpp
+    int index = threadIdx.x + blockIdx.x * blockDim.x;
+    ```
+- Use `__shared__` to declare a variable/array in shared memory
+  > - Data is shared between threads in a block
+  > - Not visible to threads in other blocks
+- Use `__syncthreads()` as a barrier
+  > - Use to prevent data hazards
 
-Use `__shared__` to declare a variable/array in shared memory
-- Data is shared between threads in a block
-- Not visible to threads in other blocks
-Use `__syncthreads()` as a barrier
-- Use to prevent data hazards
-
-### Sharing Data Between Threads
-- Within a block, threads share data via __shared memory__.
-- Extremely fast on-chip memory,
-  - By opposition to device memory, referred to as __global memory__
-  - Like a user-managed cache
-- Declare using __`__shared__`__, allocated per block.
-- Data is not visible to threads in other blocks.
-- __Implementing With Shared Memory__
-  - Cache data in shared memory
-  - Read `(blockDim.x + 2 * radius)` input elements from global memory to shared memory
-  - Compute `blockDim.x` output elements
-  - Write `blockDim.x` output elements to global memory
+- Sharing Data Between Threads
+  > - Within a block, threads share data via __shared memory__.
+  > - Extremely fast on-chip memory,
+  >   - By opposition to device memory, referred to as __global memory__
+  >   - Like a user-managed cache
+  > - Declare using __`__shared__`__, allocated per block.
+  > - Data is not visible to threads in other blocks.
+  > - __Implementing With Shared Memory__
+  >   - Cache data in shared memory
+  >   - Read `(blockDim.x + 2 * radius)` input elements from global memory to shared memory
+  >   - Compute `blockDim.x` output elements
+  >   - Write `blockDim.x` output elements to global memory
 ## Managing the Device
 __1. Coordinating Host & Device__
 - Kernel launches are asynchronous
