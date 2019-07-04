@@ -18,6 +18,7 @@ CUDA accelerates applications across a wide range of domains from image processi
     1. [Memory Management](#MemoryManagement)
         1. [CUDA API for Handling Device Memory](#CUDAAPIforHandlingDeviceMemory)
         1. [Notes about GPU Limitations](#NotesaboutGPULimitations)
+        1. [Debugging and Profiling](#DebuggingandProfiling)
 1. [Optimization Techniques for CUDA](#OptimizationTechniquesforCUDA)
 1. [Examples](#Examples)
     1. [Hello CUDA World](#HelloCUDAWorld)
@@ -153,6 +154,23 @@ These ara similar to the C equivalents `malloc()`, `free()`, `memcpy()`.
 An ideal real-time system would be able to terminate periodic tasks that do not complete by their deadline, as the result of their computation is no longer temporally valid. Current GPUs, including the one in the Jetson, do not provide a mechanism for stopping GPU operations after they are launched without resetting the entire device; GPUs cannot be considered preemptable resources as required by many conventional real-time scheduling algorithms. This creates the undesirable property that if we cannot bound the runtime of a
 GPU program, we have no guarantees on when it will terminate.
 
+<a name="DebuggingandProfiling"></a>
+## Debugging and Profiling
+1. Emulation Mode
+    - An executable compiled in device emulation mode (`nvcc-deviceemu`) runs only on the CPU (host) using the CUDA runtime support without requiring GPU nor driver
+    - Possibilities in device emulation mode:
+        - Use all debugging support available on the CPU side (breakpoints,watchdogs, etc.).
+        - Access GPU data from CPU code.
+        - Call any CPU function from GPU code (for example, printf) and vice versa.
+        - Detect deadlocks due to an improper use of `__syncthreads`.
+    - Threads are executed sequentially, so simultaneous accesses to the same memory position from multiple threads produces (potencially) different results.
+    - Access to values through GPU pointers on the CPU or CPU pointers on the GPU may produce correct results on emulation mode, but will lead to errors when properly executed on GPU.
+    - Results coming from floating-point may differ due to:
+        - Different outputs from the compiler.
+        - Different instructions set.
+        - The use of extended precision operators on intermediate results.
+
+    
 <a name="OptimizationTechniquesforCUDA"></a>
 # Optimization Techniques for CUDA
 1. Zero Copy Memory
@@ -160,7 +178,19 @@ GPU program, we have no guarantees on when it will terminate.
     - On these systems, it is possible for the CPU and GPU to access the same regions of memory when CUDA programs are implemented with Zero Copy CUDA library functions. Using Zero Copy can reduce the memory requirement of GPU programs by up to half because the CPU and the GPU do not need to maintain separate copies of the data. The CPU has access to the original data. 
     - Instead of making a copy of the original data, the GPU uses a pointer to the CPU’s copy for computation. We measure the impacts of caching and data movement by comparing the runtime of the default program implementation to the runtime of the Zero Copy implementation
 
-
+1. Optimize Memory Usage
+    - Minimize transfers between CPU and GPU. 
+        - If you want to increase data bandwidth, use “pinned” memory (responsibly), to take advantage of PCI-express capabilities.
+    - Group data transfers between CPU and GPU
+        - As latency predominates over data bandwidth.
+    - Migrate some functions from CPU to GPU even though they may not exploit too much parallelism
+        - If this skips shipping data to GPU and the way back to CPU.
+    - Optimize memory access patterns
+        - Effective data bandwidth may vary an order of magnitude depending on access pattern if we wisely exploit:
+            - Coalesced accesses to global memory (less important in Fermi).
+            - Shared memory accesses free of conflicts when using 16 banks.
+            - Texture memory accesses (they make use of a cache).
+            - Accesses to constant memory which shared the same address.
 <a name="Examples"></a>
 # Examples
 
