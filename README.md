@@ -177,7 +177,12 @@ GPU program, we have no guarantees on when it will terminate.
     - In CUDA programs, CPU memory and GPU memory are used as if they are physically separate, as in discrete GPUs, by default. When the CPU data is made available to the GPU, it is copied from CPU memory to GPU memory. On systems with integrated GPUs, such as the Jetson, the CPU and the GPU share the same physical memory so when data is copied from CPU memory to GPU memory, it moves from one region of memory to another in the same DRAM banks. 
     - On these systems, it is possible for the CPU and GPU to access the same regions of memory when CUDA programs are implemented with Zero Copy CUDA library functions. Using Zero Copy can reduce the memory requirement of GPU programs by up to half because the CPU and the GPU do not need to maintain separate copies of the data. The CPU has access to the original data. 
     - Instead of making a copy of the original data, the GPU uses a pointer to the CPU’s copy for computation. We measure the impacts of caching and data movement by comparing the runtime of the default program implementation to the runtime of the Zero Copy implementation
+    - Mapped, pinned memory (zero-copy) is useful when either:
+        - The GPU has no memory on its own and uses RAM anyway
+        - You load the data exactly once, but you have a lot of computation to perform on it and you want to hide memory transfer latencies through it.
+        - The host side wants to change/add more data, or read the results, while kernel is still running (e.g. communication)
 
+The data does not fit into GPU memory
 1. Optimize Memory Usage
     - Minimize transfers between CPU and GPU. 
         - If you want to increase data bandwidth, use “pinned” memory (responsibly), to take advantage of PCI-express capabilities.
