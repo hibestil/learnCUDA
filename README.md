@@ -18,6 +18,7 @@ CUDA accelerates applications across a wide range of domains from image processi
     1. [Memory Management](#MemoryManagement)
         1. [CUDA API for Handling Device Memory](#CUDAAPIforHandlingDeviceMemory)
         1. [Notes about GPU Limitations](#NotesaboutGPULimitations)
+1. [Optimization Techniques for CUDA](#OptimizationTechniquesforCUDA)
 1. [Examples](#Examples)
     1. [Hello CUDA World](#HelloCUDAWorld)
     1. ["Hello CUDA World!" with Device Code](#HelloCUDAWorldwithDeviceCode)
@@ -151,6 +152,14 @@ These ara similar to the C equivalents `malloc()`, `free()`, `memcpy()`.
 ### Notes about GPU Limitations
 An ideal real-time system would be able to terminate periodic tasks that do not complete by their deadline, as the result of their computation is no longer temporally valid. Current GPUs, including the one in the Jetson, do not provide a mechanism for stopping GPU operations after they are launched without resetting the entire device; GPUs cannot be considered preemptable resources as required by many conventional real-time scheduling algorithms. This creates the undesirable property that if we cannot bound the runtime of a
 GPU program, we have no guarantees on when it will terminate.
+
+<a name="OptimizationTechniquesforCUDA"></a>
+# Optimization Techniques for CUDA
+1. Zero Copy Memory
+    - In CUDA programs, CPU memory and GPU memory are used as if they are physically separate, as in discrete GPUs, by default. When the CPU data is made available to the GPU, it is copied from CPU memory to GPU memory. On systems with integrated GPUs, such as the Jetson, the CPU and the GPU share the same physical memory so when data is copied from CPU memory to GPU memory, it moves from one region of memory to another in the same DRAM banks. 
+    - On these systems, it is possible for the CPU and GPU to access the same regions of memory when CUDA programs are implemented with Zero Copy CUDA library functions. Using Zero Copy can reduce the memory requirement of GPU programs by up to half because the CPU and the GPU do not need to maintain separate copies of the data. The CPU has access to the original data. 
+    - Instead of making a copy of the original data, the GPU uses a pointer to the CPU’s copy for computation. We measure the impacts of caching and data movement by comparing the runtime of the default program implementation to the runtime of the Zero Copy implementation
+
 
 <a name="Examples"></a>
 # Examples
