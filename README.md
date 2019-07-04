@@ -7,11 +7,11 @@ In GPU-accelerated applications, the sequential part of the workload runs on the
 
 CUDA accelerates applications across a wide range of domains from image processing, to deep learning, numerical analytics and computational science. (ref:https://developer.nvidia.com/cuda-zone) 
 ## Table of Contents
-[Headers](#headers)  
+[What we will learn?](#what-will-we-learn)  
 [Emphasis](#emphasis) 
 
 
-## What we will learn?
+## What we will learn? <a name="what-will-we-learn"/>
 - [x] Write and launch CUDA C/C++ kernels
   - [x] `__global__`, `<<<>>>`, `blockIdx`, `threadIdx`, `blockDim`
 - [x] Manage GPU memory
