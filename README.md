@@ -45,8 +45,6 @@ CUDA accelerates applications across a wide range of domains from image processi
 ## Useful Links
 - CUDA Zone – tools, training and webinars : https://developer.nvidia.com/cuda-zone
 - Udacity - Intro to Parallel Programming. : https://www.youtube.com/watch?v=GiGE3QjwknQ&list=PLGvfHSgImk4aweyWlhBXNF6XISY3um82_&index=36
-- Tools
-    - Nsight - Setting Host and client devices : https://www.youtube.com/watch?v=2Mi3MRKtg2M
 
 <a name="Background"></a>
 # Background
