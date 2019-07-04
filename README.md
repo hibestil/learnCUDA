@@ -181,8 +181,11 @@ GPU program, we have no guarantees on when it will terminate.
         - The GPU has no memory on its own and uses RAM anyway
         - You load the data exactly once, but you have a lot of computation to perform on it and you want to hide memory transfer latencies through it.
         - The host side wants to change/add more data, or read the results, while kernel is still running (e.g. communication)
+        - The data does not fit into GPU memory
+    - Pinned, but not mapped memory is better:
+        - When you load or store the data multiple times. For example: you have multiple subsequent kernels, performing the work in steps - there is no need to load the data from host every time.
+        - There is not that much computation to perform and loading latencies are not going to be hidden well
 
-The data does not fit into GPU memory
 1. Optimize Memory Usage
     - Minimize transfers between CPU and GPU. 
         - If you want to increase data bandwidth, use “pinned” memory (responsibly), to take advantage of PCI-express capabilities.
