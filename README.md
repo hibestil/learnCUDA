@@ -13,8 +13,8 @@ CUDA accelerates applications across a wide range of domains from image processi
     1. [Terminology](#Terminology)
     1. [Managing the Device](#Managing-the-Device)
         1. [Coordinating Host & Device](#CoordinatingHostDevice)
-        1. [Reporting Errors](#ReportingErrors)
         1. [Device Management](#DeviceManagement)
+        1. [Reporting Errors](#ReportingErrors)
     1. [Memory Management](#MemoryManagement)
         1. [CUDA API for Handling Device Memory](#CUDAAPIforHandlingDeviceMemory)
         1. [Notes about GPU Limitations](#NotesaboutGPULimitations)
@@ -97,43 +97,43 @@ CUDA accelerates applications across a wide range of domains from image processi
   >   - Write `blockDim.x` output elements to global memory
 <a name="Managing-the-Device"></a>
 ## Managing the Device
-<a name="CoordinatingHostDevice"></a>
-__1. Coordinating Host & Device__
-- Kernel launches are asynchronous
-  - Control returns to the CPU immediately
-- CPU needs to synchronize before consuming the results
-  - `cudaMemcpy()`            : Blocks the CPU until the copy is complete
-Copy begins when all preceding CUDA calls have completed
-  - `cudaMemcpyAsync()`       : Asynchronous, does not block the CPU
-  - `cudaDeviceSynchronize()` : Blocks the CPU until all preceding CUDA calls have completed
-<a name="ReportingErrors"></a>
-__2. Reporting Errors__
-- All CUDA API calls return an error code (`cudaError_t`)
-  - Error in the API call itself
-  - Or error in an earlier asynchronous operation (e.g. kernel)
-- Get the error code for the last error:
-  - ```cpp
-      cudaError_t cudaGetLastError(void)
-    ```
-- Get a string to describe the error:
-- ```cpp
-    char *cudaGetErrorString(cudaError_t)
-    printf("%s\n", cudaGetErrorString(cudaGetLastError()));
-  ```
+1. <a name="CoordinatingHostDevice"></a>
+    __Coordinating Host & Device__
+    - Kernel launches are asynchronous
+      - Control returns to the CPU immediately
+    - CPU needs to synchronize before consuming the results
+      - `cudaMemcpy()`            : Blocks the CPU until the copy is complete
+    Copy begins when all preceding CUDA calls have completed
+      - `cudaMemcpyAsync()`       : Asynchronous, does not block the CPU
+      - `cudaDeviceSynchronize()` : Blocks the CPU until all preceding CUDA calls have completed
 <a name="DeviceManagement"></a>
-__3. Device Management__
-- Application can query and select GPUs
-  - ```cpp
-    cudaGetDeviceCount(int *count)
-    cudaSetDevice(int device)
-    cudaGetDevice(int *device)
-    cudaGetDeviceProperties(cudaDeviceProp *prop, int device)
-    ```
- - Multiple host threads can share a device
- - A single host thread can manage multiple devices
-    - `cudaSetDevice(i)` to select current device
-    - `cudaMemcpy(…)` for peer-to-peer copies
-    
+1. __Device Management__
+    - Application can query and select GPUs
+      - ```cpp
+        cudaGetDeviceCount(int *count)
+        cudaSetDevice(int device)
+        cudaGetDevice(int *device)
+        cudaGetDeviceProperties(cudaDeviceProp *prop, int device)
+        ```
+     - Multiple host threads can share a device
+     - A single host thread can manage multiple devices
+        - `cudaSetDevice(i)` to select current device
+        - `cudaMemcpy(…)` for peer-to-peer copies
+<a name="ReportingErrors"></a>
+1. __Reporting Errors__
+    - All CUDA API calls return an error code (`cudaError_t`)
+      - Error in the API call itself
+      - Or error in an earlier asynchronous operation (e.g. kernel)
+    - Get the error code for the last error:
+      - ```cpp
+          cudaError_t cudaGetLastError(void)
+        ```
+    - Get a string to describe the error:
+    - ```cpp
+        char *cudaGetErrorString(cudaError_t)
+        printf("%s\n", cudaGetErrorString(cudaGetLastError()));
+      ```
+   
 <a name="MemoryManagement"></a>
 ## Memory Management
 Host and device memory are separate entities:
