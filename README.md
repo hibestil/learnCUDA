@@ -8,10 +8,29 @@ In GPU-accelerated applications, the sequential part of the workload runs on the
 CUDA accelerates applications across a wide range of domains from image processing, to deep learning, numerical analytics and computational science. (ref:https://developer.nvidia.com/cuda-zone) 
 ## Table of Contents
 [What we will learn?](#what-will-we-learn)  
-[Emphasis](#emphasis) 
-
-
-## What we will learn? <a name="what-will-we-learn"/>
+[Useful Links](#UsefulLinks) 
+[Background](#Background)
+  - [Terminology](#Terminology)
+  - [Managing the Device](#Managing-the-Device)
+    - [Coordinating Host & Device](#CoordinatingHostDevice)
+    - [Reporting Errors](#ReportingErrors)
+    - [Device Management](#DeviceManagement)
+  - [Memory Management](#MemoryManagement)
+    - [CUDA API for Handling Device Memory](#CUDAAPIforHandlingDeviceMemory)
+    - [Notes about GPU Limitations](#NotesaboutGPULimitations)
+[Examples](#Examples)
+  - [Hello CUDA World](#HelloCUDAWorld)
+  - ["Hello CUDA World!" with Device Code](#HelloCUDAWorldwithDeviceCode)
+  - [Addition on the Device](#AdditionontheDevice)
+  - [Vector Addition on Device (Parallel)](#VectorAdditiononDeviceParallel)
+  - [Vector Addition Using Threads](#VectorAdditionUsingThreads)
+  - [Combining Threads and Blocks](#CombiningThreadsandBlocks)
+  - [Handling Arbitrary Vector Sizes](#HandlingArbitraryVectorSizes)
+  - [Cooperating Threads](#CooperatingThreads)
+  
+  
+<a name="what-will-we-learn"/>
+## What we will learn? 
 - [x] Write and launch CUDA C/C++ kernels
   - [x] `__global__`, `<<<>>>`, `blockIdx`, `threadIdx`, `blockDim`
 - [x] Manage GPU memory
@@ -21,13 +40,17 @@ CUDA accelerates applications across a wide range of domains from image processi
   - [x] `cudaMemcpy()` vs `cudaMemcpyAsync()`, `cudaDeviceSynchronize()`
 - [ ] CUDA Optimization Techniques
 - [ ] CUDA Persistent Threads
+
+<a name="UsefulLinks"/>
 ## Useful Links
 - CUDA Zone – tools, training and webinars : https://developer.nvidia.com/cuda-zone
 - Udacity - Intro to Parallel Programming. : https://www.youtube.com/watch?v=GiGE3QjwknQ&list=PLGvfHSgImk4aweyWlhBXNF6XISY3um82_&index=36
 - Tools
     - Nsight - Setting Host and client devices : https://www.youtube.com/watch?v=2Mi3MRKtg2M
 
+<a name="Background"/>
 # Background
+<a name="Terminology"/>
 ## Terminology
 - Heterogeneous Computing
   - Host The CPU and its memory (host memory)
@@ -72,7 +95,9 @@ CUDA accelerates applications across a wide range of domains from image processi
   >   - Read `(blockDim.x + 2 * radius)` input elements from global memory to shared memory
   >   - Compute `blockDim.x` output elements
   >   - Write `blockDim.x` output elements to global memory
+<a name="Managing-the-Device"/>
 ## Managing the Device
+<a name="CoordinatingHostDevice"/>
 __1. Coordinating Host & Device__
 - Kernel launches are asynchronous
   - Control returns to the CPU immediately
@@ -81,6 +106,7 @@ __1. Coordinating Host & Device__
 Copy begins when all preceding CUDA calls have completed
   - `cudaMemcpyAsync()`       : Asynchronous, does not block the CPU
   - `cudaDeviceSynchronize()` : Blocks the CPU until all preceding CUDA calls have completed
+<a name="ReportingErrors"/>
 __2. Reporting Errors__
 - All CUDA API calls return an error code (`cudaError_t`)
   - Error in the API call itself
@@ -94,6 +120,7 @@ __2. Reporting Errors__
     char *cudaGetErrorString(cudaError_t)
     printf("%s\n", cudaGetErrorString(cudaGetLastError()));
   ```
+<a name="DeviceManagement"/>
 __3. Device Management__
 - Application can query and select GPUs
   - ```cpp
@@ -106,6 +133,8 @@ __3. Device Management__
  - A single host thread can manage multiple devices
     - `cudaSetDevice(i)` to select current device
     - `cudaMemcpy(…)` for peer-to-peer copies
+    
+<a name="MemoryManagement"/>
 ## Memory Management
 Host and device memory are separate entities:
   - Device pointers point to GPU memory
@@ -115,15 +144,20 @@ Host and device memory are separate entities:
       - May be passed to/from device code
       - May not be dereferenced in device code
       
+<a name="CUDAAPIforHandlingDeviceMemory"/>      
 ### CUDA API for Handling Device Memory
 We can use `cudaMalloc()`,`cudaFree()`,`cudaMemcpy()`. 
 These ara similar to the C equivalents `malloc()`, `free()`, `memcpy()`.
 
+<a name="NotesaboutGPULimitations"/>
 ### Notes about GPU Limitations
 An ideal real-time system would be able to terminate periodic tasks that do not complete by their deadline, as the result of their computation is no longer temporally valid. Current GPUs, including the one in the Jetson, do not provide a mechanism for stopping GPU operations after they are launched without resetting the entire device; GPUs cannot be considered preemptable resources as required by many conventional real-time scheduling algorithms. This creates the undesirable property that if we cannot bound the runtime of a
 GPU program, we have no guarantees on when it will terminate.
 
+<a name="Examples"/>
 # Examples
+
+<a name="HelloCUDAWorld"/>
 ### "Hello CUDA World"
 ```cpp
 int main(void) {
@@ -134,6 +168,8 @@ int main(void) {
 To compile use this commands: (NVIDIA compiler (nvcc) can be used to compile programs with no device code)
   - `$ nvcc hello_world.cu`
   - `$ a.out Hello World!`
+  
+<a name="HelloCUDAWorldwithDeviceCode"/>
 ### "Hello CUDA World!" with Device Code
 ```cpp
 /*
@@ -161,6 +197,8 @@ Triple angle brackets mark a call from host code to device code.
   - Also called a “kernel launch”
   - We’ll return to the parameters (1,1) in a moment
 That’s all that is required to execute a function on the GPU!
+
+<a name="AdditionontheDevice"/>
 ### Addition on the Device
 ```cpp 
 /*
@@ -197,6 +235,8 @@ int main(void) {
   }
 ```
 In this example we use pointers for the variables. `add()` runs on the device, so *a*, *b* and *c* must point to device memory. We need to allocate memory on the GPU using `cudaMemcpy()` method. 
+
+<a name="VectorAdditiononDeviceParallel"/>
 ### Vector Addition on Device (Parallel)
 With `add()` (mentioned in previous example) running in parallel we can do vector addition.
   - Each parallel invocation of `add()` is referred to as a *block*.
@@ -241,6 +281,7 @@ int main(void) {
 }
 
 ```
+<a name="VectorAdditionUsingThreads"/>
 ### Vector Addition Using Threads
 We use `threadIdx.x` instead of `blockIdx.x`.
 Let’s change add() to use parallel threads instead of parallel blocks:
@@ -278,6 +319,7 @@ int main(void) {
 }
 
 ```
+<a name="CombiningThreadsandBlocks"/>
 ### Combining Threads and Blocks
 We’ve seen parallel vector addition using:
 - Several blocks with one thread each
@@ -316,6 +358,7 @@ int main(void) {
     return 0;
 }
 ```
+<a name="HandlingArbitraryVectorSizes"/>
 ### Handling Arbitrary Vector Sizes
 Avoid accessing beyond the end of the arrays:
 ```cpp 
@@ -329,6 +372,7 @@ And update the kernel launch:
 ```cpp 
 add<<<(N + M-1) / M,M>>>(d_a, d_b, d_c, N);
 ```
+<a name="CooperatingThreads"/>
 ### Cooperating Threads
 1. 1D Stencil
 ```cpp
