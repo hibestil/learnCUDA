@@ -470,3 +470,5 @@ __global__ void stencil_1d(int *in, int *out) {
       out[gindex] = result;
 }
 ```
+## Triple nested loops
+https://www.researchgate.net/figure/Translated-CUDA-code-from-triple-nested-loop-mappings_fig5_268521516
