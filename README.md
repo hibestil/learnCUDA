@@ -30,7 +30,7 @@ CUDA accelerates applications across a wide range of domains from image processi
     1. [Handling Arbitrary Vector Sizes](#HandlingArbitraryVectorSizes)
     1. [Cooperating Threads](#CooperatingThreads)
     1. [Loops & Nested loops](#LoopsNestedloops)
-    1. [References](#references)
+1. [References](#references)
   
   
 <a name="what-will-we-learn"></a>
