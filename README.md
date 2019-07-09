@@ -29,6 +29,8 @@ CUDA accelerates applications across a wide range of domains from image processi
     1. [Combining Threads and Blocks](#CombiningThreadsandBlocks)
     1. [Handling Arbitrary Vector Sizes](#HandlingArbitraryVectorSizes)
     1. [Cooperating Threads](#CooperatingThreads)
+    1. [Loops & Nested loops](#LoopsNestedloops)
+    1. [References](#references)
   
   
 <a name="what-will-we-learn"></a>
@@ -497,6 +499,7 @@ __global__ void stencil_1d(int *in, int *out) {
       out[gindex] = result;
 }
 ```
+<a name="LoopsNestedloops"></a>
 ### Loops & Nested loops
 - One for loop
     - ```cpp
@@ -610,13 +613,15 @@ __global__ void stencil_1d(int *in, int *out) {
                 }
             }
             // Triple nested loops in GPU
-            dim3 grid(1,1,1);
-            dim3 block(4,4,4);
+            dim3 grid(2,2,2);
+            dim3 block(2,2,2);
             single_loop<<<grid,block>>>();
             cudaDeviceSynchronize();
             return 0;
         }
         ```
-    
+
+<a name="references"></a>
+# References
 https://medium.com/@erangadulshan.14/1d-2d-and-3d-thread-allocation-for-loops-in-cuda-e0f908537a52
 https://www.researchgate.net/figure/Translated-CUDA-code-from-triple-nested-loop-mappings_fig5_268521516
