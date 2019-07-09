@@ -67,7 +67,34 @@ CUDA accelerates applications across a wide range of domains from image processi
   - A block can be split into parallel threads. Unlike parallel blocks, threads have mechanisms to efficiently:
   - Communicate
   - Synchronize
-
+- What is a thread block?
+    - One thread block consists of set of threads. Those threads may be in 1D, 2D or 3D. When we consider a thread block, threadIdx and blockDim standard variables in CUDA can be considered very important.
+    - ```cpp
+        threadIdx   // = Used to access the index of a thread inside a thread block 
+        threadIdx.x // = Index of a thread inside a block in X direction
+        threadIdx.y // = Index of a thread inside a block in Y direction
+        threadIdx.z // = Index of a thread inside a block in Z direction
+        ```
+    - ```cpp
+        blockDim    // = Number of threads in the block for a specific direction
+        blockDim.x  // = Number of threads in the block for X direction
+        blockDim.y  // = Number of threads in the block for Y direction
+        blockDim.z  // = Number of threads in the block for Z direction
+        ```
+-  What is a thread grid?
+    - Thread grid is a set of thread blocks. Blocks also can be in 1D, 2D or 3D (Imagine replacing threads by thread blocks in the previous clarification for thread blocks). When it comes to thread grid, following variables are important.
+    - ```cpp
+        blockIdx = Used to access an index of a thread block inside a thread grid
+        blockIdx.x = Index of a tread block in X direction
+        blockIdx.y = Index of a tread block in Y direction
+        blockIdx.z = Index of a tread block in Z direction
+        ```
+    - ```cpp
+        gridDim = Number of thread blocks in a specific direction.
+        gridDim.x = Number of thread blocks in X direction
+        gridDim.y = Number of thread blocks in Y direction
+        gridDim.z = Number of thread blocks in Z direction
+        ```
 - Launching parallel threads:
   - Launch __N__ blocks with __M__ threads per block with `kernel<<<N,M>>>(…);`
   - Use `blockIdx.x` to access block index within grid
@@ -470,5 +497,126 @@ __global__ void stencil_1d(int *in, int *out) {
       out[gindex] = result;
 }
 ```
-## Triple nested loops
+### Loops & Nested loops
+- One for loop
+    - ```cpp
+        __global__ void single_loop() {
+            int i = threadId.x + blockIdx.x * blockDim.x;
+            printf("GPU - i = %d \n",i);
+        }
+        int main(void) {
+            // Single loop in CPU
+            for(int i = 0; i <4; i++){
+                printf("CPU - i = %d \n",i);
+            }
+            // Single loop in GPU
+            dim3 grid(1,1,1);
+            dim3 block(4,1,1);
+            single_loop<<<grid,block>>>();
+            cudaDeviceSynchronize();
+            return 0;
+        }
+        ```
+    - Grid dimension is set to (1, 1, 1). That means only one thread block is created. What is the dimension of the thread block? That has been specified as (4, 1, 1). This means 4 threads are created in x direction. Therefore,
+        - blockDim.x = 4, blockDim.y = blockDim.z =1.
+        - blockIdx.x = blockIdx.y = blockIdx.z = 0.
+        - threadIdx.y = threadIdx.z = 0, threadIdx.x varies 0–3 (inclusive).
+    - How I have taken the i value? I have added the thread index for X direction to the multiplication of block index in X direction and block dimension for X direction.
+- Two nested for loops
+    - ```cpp
+        __global__ void two_nested_loops() {
+            int i = threadId.x + blockIdx.x * blockDim.x;
+            int j = threadId.y + blockIdx.y * blockDim.y;
+            printf("GPU - i = %d - j = %d \n",i,j);
+        }
+        int main(void) {
+            // Two nested loops CPU
+            for(int i = 0; i <4; i++){
+                for(int j = 0; j <4; j++){
+                    printf("CPU - i = %d - j = %d \n",i,j);
+                }
+            }
+            // Two nested loops GPU
+            dim3 grid(1,1,1);
+            dim3 block(4,4,1);
+            single_loop<<<grid,block>>>();
+            cudaDeviceSynchronize();
+            return 0;
+        }
+        ```
+    - ```cpp
+        // OR we can do same thing by increasing number of blocks
+        __global__ void two_nested_loops() {
+            int i = threadId.x + blockIdx.x * blockDim.x;
+            int j = threadId.y + blockIdx.y * blockDim.y;
+            printf("GPU - i = %d - j = %d \n",i,j);
+        }
+        int main(void) {
+            // Two nested loops in CPU
+            for(int i = 0; i <4; i++){
+                for(int j = 0; j <4; j++){
+                    printf("CPU - i = %d - j = %d \n",i,j);
+                }
+            }
+            // Two nested loops in GPU
+            dim3 grid(2,2,1);
+            dim3 block(2,2,1);
+            single_loop<<<grid,block>>>();
+            cudaDeviceSynchronize();
+            return 0;
+        }
+        ```
+
+- Triple nested for loops
+    - ```cpp
+        __global__ void triple_nested_loops() {
+            int i = threadId.x + blockIdx.x * blockDim.x;
+            int j = threadId.y + blockIdx.y * blockDim.y;
+            int k = threadId.z + blockIdx.z * blockDim.z;
+            printf("GPU - i = %d - j = %d - k = %d \n",i,j,k);
+        }
+        int main(void) {
+            // Triple nested loops in CPU
+            for(int i = 0; i <4; i++){
+                for(int j = 0; j <4; j++){
+                    for(int k = 0; k <4; k++){
+                        printf("CPU - i = %d - j = %d - k = %d \n",i,j,k);
+                    }
+                }
+            }
+            // Triple nested loops in GPU
+            dim3 grid(1,1,1);
+            dim3 block(4,4,4);
+            single_loop<<<grid,block>>>();
+            cudaDeviceSynchronize();
+            return 0;
+        }
+        ```
+    - ```cpp
+        // OR we can use two blocks instead of one block.
+        __global__ void triple_nested_loops() {
+            int i = threadId.x + blockIdx.x * blockDim.x;
+            int j = threadId.y + blockIdx.y * blockDim.y;
+            int k = threadId.z + blockIdx.z * blockDim.z;
+            printf("GPU - i = %d - j = %d - k = %d \n",i,j,k);
+        }
+        int main(void) {
+            // Triple nested loops in CPU
+            for(int i = 0; i <4; i++){
+                for(int j = 0; j <4; j++){
+                    for(int k = 0; k <4; k++){
+                        printf("CPU - i = %d - j = %d - k = %d \n",i,j,k);
+                    }
+                }
+            }
+            // Triple nested loops in GPU
+            dim3 grid(1,1,1);
+            dim3 block(4,4,4);
+            single_loop<<<grid,block>>>();
+            cudaDeviceSynchronize();
+            return 0;
+        }
+        ```
+    
+https://medium.com/@erangadulshan.14/1d-2d-and-3d-thread-allocation-for-loops-in-cuda-e0f908537a52
 https://www.researchgate.net/figure/Translated-CUDA-code-from-triple-nested-loop-mappings_fig5_268521516
