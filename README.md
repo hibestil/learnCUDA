@@ -52,6 +52,8 @@ CUDA accelerates applications across a wide range of domains from image processi
 - Udacity - Intro to Parallel Programming. : https://www.youtube.com/watch?v=GiGE3QjwknQ&list=PLGvfHSgImk4aweyWlhBXNF6XISY3um82_&index=36
 - CUDA Samples : https://github.com/NVIDIA/cuda-samples
 - An Easy Introduction to CUDA C and C++ : https://devblogs.nvidia.com/easy-introduction-cuda-c-and-c/
+- Avoiding Pitfalls when Using NVIDIA GPUs : http://drops.dagstuhl.de/opus/volltexte/2018/8984/
+- GPU Activity Monitor – NVIDIA Jetson TX Dev Kit : https://github.com/jetsonhacks/gpuGraphTX
 <a name="Background"></a>
 # Background
 <a name="Terminology"></a>
