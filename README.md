@@ -11,6 +11,7 @@ CUDA accelerates applications across a wide range of domains from image processi
 1. [Useful Links](#UsefulLinks) 
 1. [Background](#Background)
     1. [Terminology](#Terminology)
+    1. [GPU Synchronization](#GPUSynchronization)
     1. [Managing the Device](#Managing-the-Device)
         1. [Coordinating Host & Device](#CoordinatingHostDevice)
         1. [Device Management](#DeviceManagement)
@@ -125,7 +126,7 @@ CUDA accelerates applications across a wide range of domains from image processi
   >   - Read `(blockDim.x + 2 * radius)` input elements from global memory to shared memory
   >   - Compute `blockDim.x` output elements
   >   - Write `blockDim.x` output elements to global memory
-<a name="Managing-the-Device"></a>
+<a name="GPUSynchronization"></a>
 ## GPU Synchronization
     - In CUDA there are multiple ways to achieve GPU synchronization. They fall into two broad categories: explicit synchronization, which is always programmer-requested, and implicit synchronization, which can occur as a side effect of CUDA API functions intended for purposes other than synchronization. 
         - Explicit Synchronization
