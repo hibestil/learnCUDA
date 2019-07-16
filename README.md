@@ -126,6 +126,12 @@ CUDA accelerates applications across a wide range of domains from image processi
   >   - Compute `blockDim.x` output elements
   >   - Write `blockDim.x` output elements to global memory
 <a name="Managing-the-Device"></a>
+## GPU Synchronization
+    - In CUDA there are multiple ways to achieve GPU synchronization. They fall into two broad categories: explicit synchronization, which is always programmer-requested, and implicit synchronization, which can occur as a side effect of CUDA API functions intended for purposes other than synchronization. 
+        - Explicit Synchronization
+            - Explicit synchronization is typically used after a program has launched one or more asynchronous CUDA kernels or memory transfer operations and must wait for computations to complete
+        - Implicit Synchronization
+<a name="Managing-the-Device"></a>
 ## Managing the Device
 1. <a name="CoordinatingHostDevice"></a>
     __Coordinating Host & Device__
