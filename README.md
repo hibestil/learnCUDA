@@ -51,6 +51,7 @@ CUDA accelerates applications across a wide range of domains from image processi
 - Introduction to Parallel Computing : https://computing.llnl.gov/tutorials/parallel_comp/
 - BOOK : Designing and Building Parallel Programs : https://www.mcs.anl.gov/~itf/dbpp/text/book.html
 - BOOK : Introduction to Parallel Computing. https://www-users.cs.umn.edu/~karypis/parbook/
+- Performance Metrics in CUDA C/C++ : https://devblogs.nvidia.com/how-implement-performance-metrics-cuda-cc/
 - CUDA Zone – tools, training and webinars : https://developer.nvidia.com/cuda-zone
 - Udacity - Intro to Parallel Programming. : https://www.youtube.com/watch?v=GiGE3QjwknQ&list=PLGvfHSgImk4aweyWlhBXNF6XISY3um82_&index=36
 - CUDA Samples : https://github.com/NVIDIA/cuda-samples
