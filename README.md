@@ -1,5 +1,10 @@
+<p align="center">
+  <img width="350" height="197" src="https://s3.amazonaws.com/cms.ipressroom.com/219/files/20149/544a8211f6091d588d00014e_NVIDIA_CUDA-web/NVIDIA_CUDA-web_mid.jpg">
+</p>
+
 # Learn CUDA
-__This repository contains notes and examples about CUDA programming__ to get started with CUDA.
+__This repository contains notes and examples__ to get started Parallel Computing with CUDA. 
+
 ## Introduction
 CUDA® is a parallel computing platform and programming model developed by NVIDIA for general computing on graphical processing units (GPUs). With CUDA, developers are able to dramatically speed up computing applications by harnessing the power of GPUs.
 
@@ -43,7 +48,7 @@ CUDA accelerates applications across a wide range of domains from image processi
 - [x] Manage communication and synchronization
   - [x] `__shared__`, `__syncthreads()`
   - [x] `cudaMemcpy()` vs `cudaMemcpyAsync()`, `cudaDeviceSynchronize()`
-- [ ] CUDA Optimization Techniques
+- [x] CUDA Optimization Techniques
 - [ ] CUDA Persistent Threads
 
 <a name="UsefulLinks"></a>
